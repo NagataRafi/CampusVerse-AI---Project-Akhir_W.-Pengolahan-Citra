@@ -2,7 +2,7 @@
 
 > **Dokumen Status Lintas-Agent**
 > Terakhir Diperbarui: 15 Oktober 2026
-> Penanggung Jawab Sesi: Senior Full-Stack Developer Agent
+> Penanggung Jawab Sesi: Senior Frontend Engineer Agent
 
 ---
 
@@ -10,12 +10,13 @@
 
 | Parameter | Status Aktual |
 |---|---|
-| **Fase Proyek** | Fase 1 — Inisialisasi Fondasi & Dokumentasi |
-| **Status Kode** | Berjalan Normal (*Stable Baseline*) |
+| **Fase Proyek** | Fase 2 — Koreksi komposisi UI Virtual Campus |
+| **Status Kode** | Launcher kampus virtual responsif; light/dark mode dan status lokal aktif; preview dunia tetap statis |
 | **Framework & Versi** | Next.js `16.4.1`, React `19.3.0`, TypeScript `5.x`, Tailwind CSS `4.x` |
-| **Status Kompilasi (`build`)** | **PASSED** (Exit code 0, prerender static routes sukses) |
-| **Status Dev Server** | **READY** (`http://localhost:3000` merespons HTTP `200 OK`) |
-| **Status Git** | Repository lokal terinisialisasi (belum push ke remote) |
+| **Status Lint** | **PASSED** (`npm run lint`) |
+| **Status Build** | **PASSED** dengan `npm run build -- --webpack`; Turbopack lokal gagal membuka database cache |
+| **Status UI** | Komposisi baru diverifikasi di browser desktop dan mobile; tidak ada horizontal overflow pada viewport yang diuji |
+| **Status Git** | Perubahan lokal belum di-commit atau di-push |
 
 ---
 
@@ -36,24 +37,34 @@
   - Pembaruan [`AGENTS.md`](./AGENTS.md) sebagai panduan operasional wajib agent.
   - Pembuatan [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) sebagai pelacak kemajuan kerja.
   - Pembuatan [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) sebagai rujukan arsitektur saat ini dan masa depan.
+- [x] **UI Kerangka CampusVerse AI**:
+  - Mengganti halaman starter Next.js dengan dashboard kampus virtual responsif.
+  - Menambahkan navigasi, panel profil/status, aktivitas, ruang kolaborasi, dan area konsep kampus statis.
+  - Pilihan status Available, Busy, dan Away berfungsi secara lokal pada halaman preview saja.
+  - Avatar dan gestur ditampilkan sebagai rencana; tidak ada kamera, mikrofon, layanan backend, atau dunia 3D yang diaktifkan.
+  - Metadata aplikasi diperbarui untuk CampusVerse AI.
+- [x] **Redesain Adaptive UI**:
+  - Memperbarui identitas visual untuk nuansa kampus virtual/game dan menjaga area kampus sebagai fokus.
+  - Menambahkan pergantian light/dark mode dengan preferensi tema tersimpan lokal dan pilihan sistem sebagai nilai awal.
+  - Memperluas palet dan panel utama agar beradaptasi ke tema yang dipilih; menghormati preferensi reduced motion.
+  - Tidak menambahkan dependensi maupun mengaktifkan kamera, mikrofon, dunia 3D, atau layanan backend.
+- [x] **Koreksi Komposisi Virtual Campus**:
+  - Menghapus tata letak dashboard tiga kolom dan sidebar permanen; navigasi kini ringkas di header.
+  - Menjadikan area kampus sebagai hero utama dengan ilustrasi SVG lanskap berlapis, plaza, gedung kampus, pepohonan, pencahayaan, dan overlay.
+  - Memindahkan kontrol status ke panel ringkas di dalam hero dan menyederhanakan informasi ruang menjadi daftar ringan.
+  - Mempertahankan tema adaptif dan seluruh fitur 3D/AI/komunikasi sebagai placeholder yang dinyatakan secara eksplisit.
+  - Verifikasi browser: hero baru mengambil fokus layar, komponen dashboard/sidebar lama tidak lagi dirender; tema dan status tetap bekerja.
 
 ---
 
 ## 3. Hasil Pengujian yang Telah Diverifikasi
 
-Semua pengujian di bawah ini telah diverifikasi secara nyata melalui eksekusi terminal:
+Hasil verifikasi untuk koreksi komposisi UI pada 15 Oktober 2026:
 
-1. **Pengujian Kompilasi Produksi (`npm run build`)**:
-   - Status: **Berhasil (Exit Code 0)**.
-   - Kompilasi Turbopack: Lolos dalam 70 detik (`Compiled successfully in 70s`).
-   - Pemeriksaan Tipe TypeScript: Lolos dalam 24 detik tanpa peringatan tipe.
-   - Prerender Rute:
-     - `○ /` (Static content prerendered)
-     - `○ /_not-found` (Static content prerendered)
-2. **Pengujian Server Pengembangan (`npm run dev`)**:
-   - Status: **Berhasil (Exit Code 0)**.
-   - Server berjalan pada port `3000`.
-   - Permintaan HTTP GET ke `http://localhost:3000` berhasil mengembalikan respon `200 OK`.
+1. **Lint (`npm run lint`)**: berhasil, exit code `0`.
+2. **Build produksi (`npm run build -- --webpack`)**: berhasil, exit code `0`; kompilasi, pemeriksaan TypeScript, dan prerender rute `/` serta `/_not-found` berhasil.
+3. **Build default (`npm run build`)**: gagal sebelum kompilasi karena Turbopack melaporkan `Failed to open database` / `invalid digit found in string` pada persistence/cache lokal. Tidak ada perubahan konfigurasi bundler untuk menghindari atau menyembunyikan masalah cache tersebut.
+4. **Verifikasi browser**: screenshot halaman aktual menunjukkan navigasi header ringkas, hero kampus besar, serta daftar ruang di bawahnya. Tidak ada sidebar atau panel dashboard tiga kolom lama. Tema light/dark dapat diganti, bertahan setelah reload, dan merender surface sesuai tema; pilihan `Busy` menandai dirinya aktif. Tidak ditemukan horizontal overflow pada viewport browser 1425, 1009, 753, 375, maupun 345 px.
 
 ---
 
@@ -62,19 +73,16 @@ Semua pengujian di bawah ini telah diverifikasi secara nyata melalui eksekusi te
 1. **Manajemen Git & Repositori Remote**:
    - Menghubungkan remote GitHub: `https://github.com/NagataRafi/CampusVerse-AI---Project-Akhir_W.-Pengolahan-Citra`.
    - Melakukan commit awal (*initial baseline commit*) dan push branch utama.
-2. **Antarmuka Pengguna (UI) Dasar**:
-   - Penggantian halaman selamat datang default Next.js (`src/app/page.tsx`) dengan antarmuka tematik CampusVerse AI.
-   - Pembuatan layout responsif (viewport 3D container, panel status AI, panel kontrol interaksi).
-3. **Modul Grafika 3D**:
+2. **Modul Grafika 3D**:
    - Pemasangan dan konfigurasi Three.js dan React Three Fiber (`@react-three/fiber`, `@react-three/drei`).
    - Pembuatan scene 3D kampus sederhana, pencahayaan, dan kamera interaktif.
-4. **Modul Pengolahan Citra & AI Gestur**:
+3. **Modul Pengolahan Citra & AI Gestur**:
    - Pengambilan feed webcam pengguna melalui HTML5 Canvas / Video API.
    - Integrasi MediaPipe Hand Landmarker untuk pelacakan gestur tangan tanpa membebani thread utama.
    - Pemetaan gestur (misal: jempol, telapak terbuka, mengepal) ke aksi avatar.
-5. **Modul Jaringan Real-Time (Multiplayer)**:
+4. **Modul Jaringan Real-Time (Multiplayer)**:
    - Server WebSocket / signaling untuk sinkronisasi posisi avatar antar-pengguna.
-6. **Modul Konferensi Audio/Video**:
+5. **Modul Konferensi Audio/Video**:
    - Integrasi WebRTC (Mesh/SFU) untuk komunikasi langsung audio dan video dalam kampus virtual.
 
 ---
@@ -82,5 +90,5 @@ Semua pengujian di bawah ini telah diverifikasi secara nyata melalui eksekusi te
 ## 5. Satu Langkah Berikutnya yang Direkomendasikan
 
 > **Langkah Selanjutnya**:
-> **Menghubungkan repositori lokal ke remote GitHub (`origin`) dan membuat commit awal fondasi proyek.**
-> *Catatan*: Tunggu persetujuan pengguna sebelum menjalankan `git push`. Setelah itu, lanjutkan ke perancangan UI kerangka dasar CampusVerse AI pada `src/app/page.tsx`.
+> Koreksi komposisi UI Virtual Campus selesai. Berhenti pada tahap ini; tunggu instruksi pengguna sebelum memulai implementasi dunia 3D atau modul berikutnya.
+> Jangan membuat commit atau melakukan push tanpa permintaan eksplisit.
